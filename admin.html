@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HUQA.LB — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--o:#FF6500;--o2:#FF8C00;--bg:#060606;--card:#111;--text:#f2f2f2;--muted:#777;--border:rgba(255,101,0,0.18);--r:12px;}
+body{background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;min-height:100vh}
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1.5rem;background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(255,101,0,.08) 0%,transparent 70%)}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:2.5rem 2rem;width:100%;max-width:400px;text-align:center}
+.login-logo{font-size:2.2rem;font-weight:900;color:var(--o);letter-spacing:.12em;margin-bottom:.3rem;font-family:serif}
+.login-sub{color:var(--muted);font-size:.85rem;margin-bottom:2rem}
+.fg{margin-bottom:1rem;text-align:right}
+.fg label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:5px}
+.fc{width:100%;background:#1a1a1a;border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-family:inherit;font-size:.93rem;outline:none;transition:.2s;resize:vertical}
+.fc:focus{border-color:var(--o)}
+.btn-p{width:100%;padding:12px;background:var(--o);color:#000;border:none;border-radius:9px;font-family:inherit;font-weight:900;font-size:1rem;cursor:pointer;transition:.2s;margin-top:.3rem}
+.btn-p:hover{background:var(--o2)}
+.alert{padding:10px 13px;border-radius:9px;font-size:.82rem;text-align:center;margin-bottom:1rem;display:none}
+.alert.error{background:rgba(192,57,43,.2);border:1px solid #c0392b;color:#ff7070}
+.alert.success{background:rgba(39,174,96,.2);border:1px solid #27ae60;color:#5ddb8f}
+.alert.show{display:block}
+.admin-wrap{display:none;max-width:860px;margin:0 auto;padding:2rem 1.2rem}
+.admin-wrap.show{display:block}
+.adm-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border)}
+.adm-title{font-size:1.3rem;font-weight:900;color:var(--o)}
+.btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);padding:7px 16px;border-radius:8px;font-family:inherit;font-size:.82rem;cursor:pointer;transition:.2s}
+.btn-logout:hover{color:var(--text);border-color:var(--text)}
+.adm-tabs{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.8rem}
+.a-tab{flex:1;padding:11px;background:transparent;border:none;color:var(--muted);font-family:inherit;font-size:.88rem;cursor:pointer;transition:.2s}
+.a-tab.active{background:var(--o);color:#000;font-weight:800}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.btn-s{width:100%;padding:10px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:.88rem;cursor:pointer;margin-top:7px;transition:.2s}
+.btn-s:hover{color:var(--text);border-color:var(--text)}
+.chk-lbl{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.88rem}
+.img-tip{font-size:.75rem;color:var(--muted);margin-top:4px}
+.adm-item{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:#1a1a1a;border:1px solid var(--border);border-radius:10px;margin-bottom:9px;gap:10px}
+.adm-item-info{flex:1;min-width:0}
+.adm-item-name{font-size:.92rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.adm-item-meta{font-size:.75rem;color:var(--muted);margin-top:2px}
+.adm-acts{display:flex;gap:7px;flex-shrink:0}
+.btn-ico{background:none;border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:.82rem;display:flex;align-items:center;justify-content:center;transition:.2s}
+.btn-ico.del:hover{background:#c0392b;border-color:#c0392b;color:#fff}
+.btn-ico.edit:hover{background:var(--o);border-color:var(--o);color:#000}
+.no-prod{text-align:center;color:var(--muted);padding:3rem;font-size:.88rem}
+.prod-count{color:var(--muted);font-size:.8rem;margin-bottom:.8rem}
+@media(max-width:600px){.form-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">HUQA.LB</div>
+    <div class="login-sub">لوحة تحكم الأدمن</div>
+    <div class="alert error" id="pw-err">كلمة المرور غلط، حاول مجدداً</div>
+    <div class="fg">
+      <label>كلمة المرور</label>
+      <input type="password" class="fc" id="pw-in" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPw()">
+    </div>
+    <button class="btn-p" onclick="checkPw()">🔐 دخول</button>
+  </div>
+</div>
+
+<div class="admin-wrap" id="admin-wrap">
+  <div class="adm-header">
+    <div class="adm-title">⚙️ HUQA.LB — لوحة التحكم</div>
+    <button class="btn-logout" onclick="logout()">تسجيل خروج</button>
+  </div>
+
+  <div class="adm-tabs">
+    <button class="a-tab active" id="tab-btn-add" onclick="showTab('add',this)">➕ إضافة منتج</button>
+    <button class="a-tab" id="tab-btn-list" onclick="showTab('list',this)">📦 إدارة المنتجات</button>
+  </div>
+
+  <div id="tab-add">
+    <div class="alert success" id="add-ok">✅ تم حفظ المنتج بنجاح!</div>
+    <div class="alert error" id="add-err">❌ الرجاء ملء الاسم والسعر على الأقل</div>
+    <div class="form-row">
+      <div class="fg"><label>الاسم بالعربي *</label><input type="text" class="fc" id="p-ar" placeholder="مثال: شيشة فاخرة"></div>
+      <div class="fg"><label>Name in English *</label><input type="text" class="fc" id="p-en" placeholder="e.g. Premium Hookah"></div>
+    </div>
+    <div class="fg"><label>الوصف بالعربي</label><textarea class="fc" id="d-ar" rows="2" placeholder="وصف قصير للمنتج"></textarea></div>
+    <div class="fg"><label>Description in English</label><textarea class="fc" id="d-en" rows="2" placeholder="Short product description"></textarea></div>
+    <div class="form-row">
+      <div class="fg"><label>السعر ($) *</label><input type="number" class="fc" id="p-price" placeholder="0.00" min="0" step="0.5"></div>
+      <div class="fg"><label>الفئة</label>
+        <select class="fc" id="p-cat">
+          <option value="vape">فيب / Vape</option>
+          <option value="hookah">شيشة / Hookah</option>
+          <option value="accessories">إكسسوارات / Accessories</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg">
+      <label>رابط صورة المنتج (URL)</label>
+      <input type="text" class="fc" id="p-img" placeholder="https://i.imgur.com/...">
+      <div class="img-tip">💡 ارفع الصورة على <strong>imgur.com</strong> ثم انسخ الرابط المباشر</div>
+    </div>
+    <div class="fg"><label class="chk-lbl"><input type="checkbox" id="p-new"><span>🆕 تمييز كمنتج جديد</span></label></div>
+    <input type="hidden" id="edit-id">
+    <button class="btn-p" onclick="saveProduct()" id="save-btn">💾 حفظ المنتج</button>
+    <button class="btn-s" onclick="clearForm()" id="cancel-edit" style="display:none">✕ إلغاء التعديل</button>
+  </div>
+
+  <div id="tab-list" style="display:none">
+    <div id="adm-list"></div>
+  </div>
+</div>
+
+<script>
+const SK='huqa_products_v1';
+const PW='huqalb1234';
+const DEFAULTS=[
+  {id:1,ar:'شيشة كلاسيك فاخرة',en:'Classic Premium Hookah',dar:'شيشة مصنوعة من أجود المواد، تصميم أنيق وعصري.',den:'Premium quality hookah with elegant modern design.',price:45,img:'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=500&q=80',isNew:false,cat:'hookah'},
+  {id:2,ar:'فيب ديسبوزبل — توت العليق',en:'Disposable Vape — Raspberry',dar:'نكهة توت العليق الطازجة، 5000 نفخة، بطارية مدمجة.',den:'Fresh raspberry flavor, 5000 puffs, built-in battery.',price:12,img:'https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=500&q=80',isNew:true,cat:'vape'},
+  {id:3,ar:'معسّل تفاح نعناع',en:'Apple Mint Tobacco',dar:'معسّل ذو نكهة التفاح والنعناع المنعش، 250 غرام.',den:'Apple & mint flavored shisha tobacco, 250g blend.',price:8,img:'https://images.unsplash.com/photo-1567529684892-09290a1b2d05?w=500&q=80',isNew:false,cat:'hookah'},
+  {id:4,ar:'فحم سريع الاشتعال',en:'Quick-Light Charcoal',dar:'فحم عالي الجودة، عبوة 40 قطعة.',den:'Premium quick-light charcoal, 40-piece box.',price:4,img:'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=500&q=80',isNew:false,cat:'accessories'},
+  {id:5,ar:'فيب بود — كيت كامل',en:'Pod System — Complete Kit',dar:'جهاز بود قابل لإعادة الشحن مع بود وسائل.',den:'Rechargeable pod device with pod and e-liquid.',price:25,img:'https://images.unsplash.com/photo-1625296276703-3fbc924f07b5?w=500&q=80',isNew:true,cat:'vape'},
+  {id:6,ar:'مجموعة إكسسوارات الشيشة',en:'Hookah Accessories Bundle',dar:'شيلانج، حجر صيني، كباية — مجموعة كاملة.',den:'Hose, diffuser, glass base — complete bundle.',price:18,img:'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=500&q=80',isNew:false,cat:'accessories'}
+];
+function getProds(){try{const s=localStorage.getItem(SK);return s?JSON.parse(s):DEFAULTS;}catch{return DEFAULTS;}}
+function saveProds(p){localStorage.setItem(SK,JSON.stringify(p));}
+
+function checkPw(){
+  if(document.getElementById('pw-in').value===PW){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('admin-wrap').classList.add('show');
+  } else {
+    const e=document.getElementById('pw-err');
+    e.classList.add('show');
+    document.getElementById('pw-in').value='';
+    setTimeout(()=>e.classList.remove('show'),2500);
+  }
+}
+function logout(){
+  document.getElementById('admin-wrap').classList.remove('show');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('pw-in').value='';
+}
+function showTab(t,btn){
+  document.querySelectorAll('.a-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-add').style.display=t==='add'?'block':'none';
+  document.getElementById('tab-list').style.display=t==='list'?'block':'none';
+  if(t==='list') renderList();
+}
+function clearForm(){
+  ['p-ar','p-en','d-ar','d-en','p-price','p-img'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('p-new').checked=false;
+  document.getElementById('p-cat').value='vape';
+  document.getElementById('edit-id').value='';
+  document.getElementById('cancel-edit').style.display='none';
+  document.getElementById('save-btn').textContent='💾 حفظ المنتج';
+}
+function saveProduct(){
+  const ar=document.getElementById('p-ar').value.trim();
+  const en=document.getElementById('p-en').value.trim();
+  const price=parseFloat(document.getElementById('p-price').value);
+  if((!ar&&!en)||isNaN(price)){
+    const e=document.getElementById('add-err');e.classList.add('show');
+    setTimeout(()=>e.classList.remove('show'),2500);return;
+  }
+  const prods=getProds();
+  const eid=document.getElementById('edit-id').value;
+  const obj={ar:ar||en,en:en||ar,dar:document.getElementById('d-ar').value.trim(),den:document.getElementById('d-en').value.trim(),price,img:document.getElementById('p-img').value.trim(),isNew:document.getElementById('p-new').checked,cat:document.getElementById('p-cat').value};
+  if(eid){const idx=prods.findIndex(p=>p.id===parseInt(eid));if(idx!==-1)prods[idx]={...prods[idx],...obj};}
+  else prods.push({id:Date.now(),...obj});
+  saveProds(prods);clearForm();
+  const ok=document.getElementById('add-ok');ok.classList.add('show');
+  setTimeout(()=>ok.classList.remove('show'),2500);
+}
+const CATS={vape:'فيب',hookah:'شيشة',accessories:'إكسسوارات'};
+function renderList(){
+  const prods=getProds();
+  const c=document.getElementById('adm-list');
+  if(!prods.length){c.innerHTML='<div class="no-prod">لا توجد منتجات بعد</div>';return;}
+  c.innerHTML=`<div class="prod-count">${prods.length} منتج مسجّل</div>`+prods.map(p=>`
+    <div class="adm-item">
+      <div class="adm-item-info">
+        <div class="adm-item-name">${p.ar} ${p.isNew?'🆕':''}</div>
+        <div class="adm-item-meta">${CATS[p.cat]||p.cat} — <strong style="color:var(--o)">$${p.price}</strong></div>
+      </div>
+      <div class="adm-acts">
+        <button class="btn-ico edit" onclick="editProd(${p.id})"><i class="fas fa-pen"></i></button>
+        <button class="btn-ico del" onclick="delProd(${p.id})"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+function editProd(id){
+  const p=getProds().find(x=>x.id===id);if(!p)return;
+  showTab('add',document.getElementById('tab-btn-add'));
+  document.getElementById('p-ar').value=p.ar;
+  document.getElementById('p-en').value=p.en;
+  document.getElementById('d-ar').value=p.dar;
+  document.getElementById('d-en').value=p.den;
+  document.getElementById('p-price').value=p.price;
+  document.getElementById('p-img').value=p.img;
+  document.getElementById('p-new').checked=p.isNew;
+  document.getElementById('p-cat').value=p.cat;
+  document.getElementById('edit-id').value=p.id;
+  document.getElementById('cancel-edit').style.display='block';
+  document.getElementById('save-btn').textContent='✏️ تحديث المنتج';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function delProd(id){
+  if(!confirm('هل أنت متأكد من حذف هذا المنتج؟'))return;
+  saveProds(getProds().filter(p=>p.id!==id));
+  renderList();
+}
+</script>
+</body>
+</html>
